@@ -21,6 +21,7 @@ export function compile(plan, state, intentHash) {
         break;
       }
       case "allocate":
+        if (!action.splits.some((sp) => units(sp.amount) > 0n)) break; // nothing to allocate
         calls.push({
           type: "allocate", fn: "allocate",
           args: [asset.address, action.splits.map((s) => BUCKETS[s.bucket]), action.splits.map((s) => units(s.amount)), intentHash],

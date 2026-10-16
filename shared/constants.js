@@ -17,7 +17,8 @@ export const TIERS = { T0: "T0", T1: "T1", T2: "T2", T3: "T3" };
 
 /** Scam-pattern weights (risk/scam.js). Threshold ≥ 0.6 holds the payment and alerts the guardian. */
 export const SCAM = {
-  threshold: 0.6,
+  threshold: 0.6, // hold + guardian alert
+  warn: 0.3, // force owner co-signature (T2) + guardian alert
   weights: {
     payeeCoolingOff: 0.35,
     payeeYoung: 0.25,

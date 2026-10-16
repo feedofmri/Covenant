@@ -210,6 +210,8 @@ export function createAgent({ ctx, config, store, model, notify = async () => {}
       await notify({ to: "owner", kind: "proposal", proposal: p, text: `${c.payee.alias} needs ${p.amount} ${c.asset} (${c.purpose || "payment"}). This is ${p.why}, so it needs your approval. Expires in 24 hours.`, link: `/approve/${p.id}` });
     }
 
+    const warn = verdict.checks.find((x) => x.id === "R-11" && x.status === "t2");
+    if (warn && proposals.length) await notify({ to: "guardian", kind: "scam_warn", text: `Covenant asked for a co-signature on a payment that looks unusual. ${warn.detail}` });
     const status = proposals.length && !t1.length ? "awaiting_owner" : "executed";
     const rec = await record(d, {
       status, txHashes, scenario,

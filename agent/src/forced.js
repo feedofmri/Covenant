@@ -10,7 +10,7 @@ export async function forcedCall(ctx, { fn, args, to, abi, data, from = ctx.wall
   try {
     await ctx.publicClient.call({ account: from.account, to: target, data: calldata });
   } catch (e) {
-    reason = revertReason(e, abi ?? ctx.abis.vault);
+    reason = revertReason(e, [...ctx.abis.vault, ...ctx.abis.erc20, ...ctx.abis.amm, ...(abi ?? [])]);
   }
   const nonce = await ctx.publicClient.getTransactionCount({ address: from.account.address, blockTag: "pending" });
   const hash = await from.sendTransaction({ to: target, data: calldata, gas: 400_000n, nonce });

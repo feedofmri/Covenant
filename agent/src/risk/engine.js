@@ -63,7 +63,7 @@ export function checkPlan({ plan, calls, ownerActions, state, trigger, history =
         history: (history.paymentAmounts ?? []).map(Number), untrustedOrigin: Boolean(trigger.forwarded), now: state.now,
       });
       scam = !scam || s.score > scam.score ? s : scam;
-      checks.push(s.held ? R("R-11", "hold", explainScam(s)) : R("R-11", `pass(${s.score})`));
+      checks.push(s.held ? R("R-11", "hold", explainScam(s)) : s.warn ? R("R-11", "t2", explainScam(s)) : R("R-11", `pass(${s.score})`));
       planned[c.asset] = (planned[c.asset] ?? 0n) + c.amount;
     }
 

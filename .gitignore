@@ -11,3 +11,6 @@ web/dist/
 *.sqlite-*
 data/
 .DS_Store
+shared/deployments/localhost.json
+shared/mandates/localhost.json
+agent/test/fixtures/tmp/

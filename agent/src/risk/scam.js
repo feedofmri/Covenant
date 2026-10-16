@@ -28,7 +28,7 @@ export function scamScore({ text = "", payee = null, newPayee = false, amount = 
   const hour = Math.floor(((now / 60 + tzOffsetMin) % 1440) / 60);
   if (hour >= 0 && hour < 5) features.oddHour = w.oddHour;
   const score = Math.round(Object.values(features).reduce((a, b) => a + b, 0) * 100) / 100;
-  return { score, held: score >= SCAM.threshold, features, keywords: hits };
+  return { score, held: score >= SCAM.threshold, warn: score >= SCAM.warn && score < SCAM.threshold, features, keywords: hits };
 }
 
 export function explainScam(result) {

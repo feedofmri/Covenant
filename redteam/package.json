@@ -8,6 +8,9 @@
     "start": "node runner.js"
   },
   "dependencies": {
-    "viem": "^2.57.7"
+    "viem": "^2.57.7",
+    "@covenant/shared": "*",
+    "@covenant/agent": "*",
+    "@covenant/server": "*"
   }
 }
