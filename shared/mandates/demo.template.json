@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "owner": "${OWNER}",
+  "guardian": "${GUARDIAN}",
+  "currency": "USDC",
+  "buckets": { "FAMILY": 50, "EMERGENCY": 20, "SAVINGS": 30 },
+  "emergencyTargetMonths": 3,
+  "payees": [
+    { "alias": "Mother", "address": "${MOTHER}", "purpose": "Monthly family support" },
+    { "alias": "School", "address": "${SCHOOL}", "purpose": "Children's school fees" }
+  ],
+  "remittances": [
+    { "payee": "Mother", "amount": "200", "asset": "USDC", "cron": "0 9 1 * *", "bucket": "FAMILY" }
+  ],
+  "savings": { "liquidBuffer": "100", "lendingCapPct": 50 },
+  "limits": { "perTx": "250", "daily": "300", "t2Ceiling": "1000" },
+  "jurisdictionPack": "demo-testnet"
+}

@@ -1,0 +1,13 @@
+{
+  "name": "@covenant/redteam",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "node runner.js"
+  },
+  "dependencies": {
+    "viem": "^2.57.7"
+  }
+}

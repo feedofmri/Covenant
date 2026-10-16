@@ -1,0 +1,19 @@
+{
+  "name": "@covenant/shared",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./schemas/*": "./schemas/*",
+    "./abi/*": "./abi/*",
+    "./deployments/*": "./deployments/*",
+    "./*": "./*"
+  },
+  "dependencies": {
+    "zod": "4.1.12",
+    "canonicalize": "2.1.0",
+    "viem": "2.57.7"
+  }
+}
