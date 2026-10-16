@@ -37,7 +37,7 @@ module.exports = {
     // Under `hardhat node`, reverted txs are still mined and return a hash (as on a real chain), so red-team
     // evidence works locally. In-process tests keep throwing so expectRevert() sees the error.
     hardhat: { chainId: 31337, allowUnlimitedContractSize: process.env.COVERAGE === "1", throwOnTransactionFailures: !process.argv.includes("node") },
-    localhost: { url: "http://127.0.0.1:8545", chainId: 31337 },
+    localhost: { url: process.env.LOCAL_RPC_URL || "http://127.0.0.1:8545", chainId: 31337 },
     baseSepolia: {
       url: process.env.BASE_SEPOLIA_RPC_URL || "https://sepolia.base.org",
       chainId: 84532,

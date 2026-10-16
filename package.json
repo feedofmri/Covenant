@@ -5,8 +5,17 @@
   "description": "An AI wallet agent whose authority is bounded by an on-chain policy contract.",
   "license": "MIT",
   "type": "module",
-  "engines": { "node": ">=22" },
-  "workspaces": ["contracts", "shared", "agent", "server", "web", "redteam"],
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "contracts",
+    "shared",
+    "agent",
+    "server",
+    "web",
+    "redteam"
+  ],
   "scripts": {
     "build:contracts": "npm -w contracts run build",
     "test": "npm -w contracts test && npm -w agent test && npm -w server test",
@@ -17,11 +26,19 @@
     "deploy:base-sepolia": "npm -w contracts run deploy:base-sepolia",
     "server": "npm -w server start",
     "web": "npm -w web run dev",
-    "redteam": "npm -w redteam start",
+    "redteam": "node redteam/runner.js",
     "ledger": "node scripts/ledger.js",
-    "demo:local": "node scripts/demo/run-local.js",
-    "lint": "eslint . && prettier --check .",
+    "lint": "eslint .",
     "format": "prettier --write .",
-    "licenses": "node scripts/check-licenses.js"
+    "licenses": "node scripts/check-licenses.js",
+    "stack": "bash scripts/local-stack.sh",
+    "demo": "node scripts/demo/run-scenarios.js"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.10",
+    "wait-on": "^8.0.5"
   }
 }

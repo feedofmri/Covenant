@@ -1,0 +1,37 @@
+# One-command local stack: chain + deploy + server + web.   docker compose up --build
+services:
+  chain:
+    image: node:22-bookworm-slim
+    working_dir: /app
+    volumes: [".:/app"]
+    command: sh -c "npm ci && cd contracts && npx hardhat node --hostname 0.0.0.0"
+    ports: ["8545:8545"]
+    healthcheck: { test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8545',{method:'POST',body:'{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"eth_chainId\"}',headers:{'content-type':'application/json'}}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"], interval: 5s, retries: 60 }
+  deploy:
+    image: node:22-bookworm-slim
+    working_dir: /app/contracts
+    volumes: [".:/app"]
+    depends_on: { chain: { condition: service_healthy } }
+    environment: { LOCAL_RPC_URL: "http://chain:8545" }
+    command: npx hardhat run scripts/deploy.js --network localhost
+  server:
+    image: node:22-bookworm-slim
+    working_dir: /app
+    volumes: [".:/app"]
+    depends_on: { deploy: { condition: service_completed_successfully } }
+    environment:
+      DEPLOYMENT: localhost
+      RPC_URLS: http://chain:8545
+      AGENT_PRIVATE_KEY: "0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6" # public Hardhat dev key #3
+      ADMIN_TOKEN: dev
+      DB_PATH: data/compose.sqlite
+    command: node server/src/index.js
+    ports: ["8787:8787"]
+  web:
+    image: node:22-bookworm-slim
+    working_dir: /app/web
+    volumes: [".:/app"]
+    depends_on: [server]
+    environment: { API_PROXY: "http://server:8787" }
+    command: npx vite --host 0.0.0.0
+    ports: ["5173:5173"]

@@ -24,7 +24,7 @@ const server = await startServer({
   deployment: network,
   agentPrivateKey: key("agent"),
   dbPath: process.env.DB_PATH || `data/${network}.sqlite`,
-  port: Number(process.env.PORT || 8787),
+  port: Number(process.env.SCENARIO_PORT || 8788), // separate from a running dashboard server
   scheduler: false,
   anchorMode: process.env.ANCHOR_MODE || "each",
 });

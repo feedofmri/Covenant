@@ -12,7 +12,7 @@ import { verifyReceipt } from "./verify-receipt.js";
 
 const json = (v) => JSON.parse(JSON.stringify(v, (_, x) => (typeof x === "bigint" ? x.toString() : x)));
 
-export async function createApi({ ctx, store, agent, model, indexer, scheduler, notify, log, config }) {
+export async function createApi({ ctx, store, agent, model, indexer, scheduler, log, config }) {
   const app = Fastify({ loggerInstance: log, trustProxy: true, disableRequestLogging: process.env.LOG_REQUESTS !== "1" });
   await app.register(cors, { origin: true });
   await app.register(rateLimit, { max: 120, timeWindow: "1 minute" });

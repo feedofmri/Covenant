@@ -61,6 +61,8 @@ export function createSqliteStore(db) {
     // ── triggers ──
     hasTrigger: (id) => Boolean(q("SELECT 1 FROM triggers WHERE id = ?").get(String(id))),
     markTrigger: (id, type) => q("INSERT OR IGNORE INTO triggers (id, type, at) VALUES (?, ?, ?)").run(String(id), type ?? null, now()),
+    /** Atomic claim: true only for the first process to see this trigger id. */
+    claimTrigger: (id, type) => q("INSERT OR IGNORE INTO triggers (id, type, at) VALUES (?, ?, ?)").run(String(id), type ?? null, now()).changes === 1,
     // ── receipts ──
     saveReceipt: ({ receipt, receiptHash, anchorTx }) =>
       q("INSERT OR REPLACE INTO receipts (id, json, receipt_hash, intent_hash, status, tier, anchor_tx, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")

@@ -69,8 +69,7 @@ export function createAgent({ ctx, config, store, model, notify = async () => {}
   }
 
   async function runCycleInner(trigger) {
-    if (trigger.id && store.hasTrigger(trigger.id)) return { status: "duplicate" };
-    if (trigger.id) store.markTrigger(trigger.id, trigger.type);
+    if (trigger.id && !store.claimTrigger(trigger.id, trigger.type)) return { status: "duplicate" };
     if (!ctx.walletClient) throw new Error("AGENT_PRIVATE_KEY is not configured");
     const scenario = trigger.scenario ?? null;
     const state = await observe(ctx, store);
@@ -127,7 +126,7 @@ export function createAgent({ ctx, config, store, model, notify = async () => {}
     }
 
     if (ownerActions.length) {
-      const rec = await record(d, { status: "awaiting_owner", signals: { ...signals, ownerActions: ownerActions.map(({ data, ...o }) => o) }, scenario });
+      const rec = await record(d, { status: "awaiting_owner", signals: { ...signals, ownerActions: ownerActions.map(({ data: _data, ...o }) => o) }, scenario });
       for (const o of ownerActions) {
         store.saveOwnerAction({ ...o, receiptId: rec.receipt.receiptId });
         await notify({ to: "owner", kind: "add_payee", text: `To pay "${o.label}" you must add them as a payee yourself. New payees can be paid after a 24-hour cooling-off.`, link: `/payees?add=${o.address}&label=${encodeURIComponent(o.label)}` });

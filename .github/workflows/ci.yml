@@ -1,0 +1,83 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-licenses:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run licenses
+
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run build:contracts
+      - name: ABIs in shared/ match the contracts
+        run: git diff --exit-code shared/abi
+      - run: npm run test:contracts
+        env: { INVARIANT_RUNS: "60", INVARIANT_STEPS: "50" }
+      - run: npm run coverage
+      - run: node scripts/coverage-gate.js
+
+  slither:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - uses: crytic/slither-action@v0.4.0
+        with:
+          target: contracts
+          slither-args: --filter-paths "mocks|node_modules" --exclude-dependencies
+          fail-on: high
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Start a local chain and deploy
+        run: |
+          (cd contracts && npx hardhat node > ../hardhat.log 2>&1 &)
+          npx wait-on -t 60000 tcp:127.0.0.1:8545
+          npm run deploy:local
+      - name: Agent and server tests (unit + integration)
+        run: npm -w agent test && npm -w server test
+      - name: Demo scenarios D1–D9
+        run: node scripts/demo/run-scenarios.js
+      - name: Red-team suite (30 cases)
+        run: node redteam/runner.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: evidence-local
+          path: |
+            evidence/localhost/
+            redteam/RESULTS.localhost.md
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm -w web run build

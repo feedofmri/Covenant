@@ -1,0 +1,11 @@
+node_modules
+contracts/artifacts
+contracts/cache
+contracts/coverage
+web/dist
+shared/abi
+data
+evidence
+package-lock.json
+*.md
+*.sol

@@ -9,6 +9,32 @@ Companion to the *Covenant — Agent Wallet Win Plan (v2)*. That document says *
 
 ---
 
+## Implementation status (16 Oct 2026)
+
+The engineering work in this plan is implemented and tested on a local chain. What remains needs the team's own keys, accounts or time on camera.
+
+| Area | Status | Where |
+| --- | --- | --- |
+| Contracts (C-01…C-14, C-16) | Done. PolicyVault as EIP-1167 clones, 38 unit tests, invariant harness (0 violations over 300 × 60), 100 % line coverage | `contracts/` |
+| Agent (A-01…A-15) | Done. Claude planner via structured outputs, offline planner, hijacked red-team planner, 15 rules, fork/snapshot simulation, verification, receipts, mandate builder, peg monitor | `agent/` |
+| Server, bot, web (S-01…S-14) | Done. API with wallet sessions, indexer, scheduler (incl. unattended run), Telegram bot, web app with gasless co-sign; browser flows tested | `server/`, `web/` |
+| Evidence and red team (E-01, E-03…E-07) | Done locally. D1–D9 script, ledger export, 30 cases: 30/30 stopped, 0 gained | `scripts/demo/`, `redteam/` |
+| Docs (E-08…E-11) | Drafted: technical doc, self-assessment, judge brief, known risks, deployment and demo runbooks, deck outline, video script | `docs/` |
+| CI, Docker, licences | Done. Lint, licence allowlist (passes), contract tests + coverage gate, Slither, end-to-end job, web build; Dockerfile with anvil; compose | `.github/`, `Dockerfile` |
+| **Base Sepolia deployment and public ledger** | **Not done: needs funded keys** — follow `docs/deployment.md` | — |
+| Video, deck slides, registration, organiser email | Not done (team) | `docs/video-script.md`, `docs/deck-outline.md` |
+| C-17 Foundry invariants (Should), C-18 FISCO BCOS, C-19 mainnet set (Could) | Not started | — |
+
+**Deviations from the plan below, decided during the build**
+
+* **No wagmi in the web app.** Its connector bundle pulls MPL-2.0 and unlicensed MetaMask SDK packages; a 70-line viem EIP-1193 provider replaces it, and `npm run licenses` passes.
+* **Vault is a clone.** The vault plus a factory that embeds it exceeded the 24 KB limit; the factory now deploys a locked implementation and creates EIP-1167 clones initialised in the same transaction. Compiled with via-IR (vault ≈ 21 KB).
+* **Simulation modes.** Hardhat cannot fork another local Hardhat node, so local development simulates with `evm_snapshot` / `evm_revert` on chain 31337 only; production uses an anvil fork (shipped in the Docker image).
+* **Red-team cases** live in one file, `redteam/cases.js` (30 cases), instead of one JSON file per case.
+* **Scam score has two thresholds:** ≥ 0.6 holds the request; ≥ 0.3 forces owner co-signature and alerts the guardian.
+* **Demo wage is 1 000 USDC**, so the D4 hospital bill is covered by topping up the family bucket from the emergency fund (the planner adds that reallocation itself).
+* **Model defaults:** planner `claude-opus-5-5`, classifier `claude-haiku-5-5`. A model refusal or outage fails closed to the offline planner; schedules never use a model.
+
 ## 0. Changes to the Win Plan found while planning the build
 
 Turning the v2 plan into an implementable spec showed ten problems. Each is fixed below, and the fixes are already in the specs in this document.

@@ -19,6 +19,7 @@ export function createMemoryStore({ payees = [], mandate = null } = {}) {
     listTxs: () => s.txs,
     hasTrigger: (id) => s.triggers.has(id),
     markTrigger: (id) => s.triggers.add(id),
+    claimTrigger: (id) => (s.triggers.has(id) ? false : (s.triggers.add(id), true)),
     addPayment: (p) => s.payments.push(p),
     recentPayments: () => s.payments.slice(-50),
     paymentAmounts: () => s.payments.slice(-50).map((p) => Number(p.units)),
