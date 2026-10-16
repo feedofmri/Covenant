@@ -22,7 +22,7 @@ Scope: `contracts/src/PolicyVault.sol`, `VaultFactory.sol`, `ReceiptRegistry.sol
 | # | Layer | Implementation | Stops |
 | --- | --- | --- | --- |
 | 1 | Intent firewall | `agent/src/firewall.js` — instruction channels, datamarked `<untrusted_data>`, **trigger-scoped capabilities**, injection classifier (signal only) | indirect prompt injection, strangers' messages |
-| 2 | Plan schema | `shared/schemas/plan.js` — payee enum of registered aliases, decimal-string amounts | invented recipients, decimals and exponent tricks |
+| 2 | Plan schema | `shared/schemas/plan.js` — payee enum of registered aliases, decimal-string amounts; every model reply is validated and a violation fails closed | invented recipients, decimals and exponent tricks |
 | 3 | Risk engine | `agent/src/risk/engine.js` — R-01…R-15 | caps, sanctions, depeg, pool manipulation, scams, duplicates |
 | 4 | Pre-trade simulation | `agent/src/simulate.js` — fork, impersonated agent, measured deltas | anything the contract would revert; unexpected deltas |
 | 5 | **PolicyVault** | `contracts/src/PolicyVault.sol` | everything above, even with the off-chain stack bypassed |

@@ -65,8 +65,8 @@ Docker alternative: `docker compose up --build`.
 ```bash
 npm run test:contracts   # 38 unit tests + invariant harness (INVARIANT_RUNS=300 INVARIANT_STEPS=60 for the long run)
 npm run coverage         # solidity-coverage; scripts/coverage-gate.js enforces ≥ 95 % lines on production contracts
-npm -w agent test        # 16 unit tests + 8 end-to-end tests (need a local chain: npm run node && npm run deploy:local)
-npm -w server test       # API, auth, ledger, Telegram link codes
+npm -w agent test        # 32 tests: unit, Claude adapter against a fake API, end-to-end (need: npm run node && npm run deploy:local)
+npm -w server test       # 21 tests: API and auth, Telegram bot, system test, unattended run
 npm run lint && npm run licenses
 ```
 

@@ -8,7 +8,7 @@ import { remittancePlan, savingsSweepPlan, anchorBatch } from "@covenant/agent";
 export function createScheduler({ ctx, store, agent, indexer, notify, log, config }) {
   const tasks = [];
   const env = process.env;
-  const stamp = () => new Date().toISOString().slice(0, 16);
+  const stamp = () => new Date().toISOString().slice(0, 19); // per-second idempotency key: one run per scheduled fire
   const run = (trigger) => indexer.runAndLog({ scenario: env.UNATTENDED === "1" ? "UR" : store.kvGet("scenarioTag"), ...trigger });
 
   function scheduleMandate() {

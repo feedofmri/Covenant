@@ -11,6 +11,8 @@ Companion to the *Covenant — Agent Wallet Win Plan (v2)*. That document says *
 
 ## Implementation status (16 Oct 2026)
 
+**Full test pass (fresh clone):** lint, licence check, 40 contract tests, coverage gate (PolicyVault 100 % lines), 32 agent tests, 21 server tests (three consecutive rounds on one chain), D1–D9 demo, 30/30 red-team, 16 page renders and 6 wallet flows in a real browser, all 20 receipts verified on-chain, Docker image built and healthy. Not testable here: live Claude API (no key), live Telegram (no token), Base Sepolia (no funded keys), anvil inside the image (GitHub downloads blocked).
+
 The engineering work in this plan is implemented and tested on a local chain. What remains needs the team's own keys, accounts or time on camera.
 
 | Area | Status | Where |

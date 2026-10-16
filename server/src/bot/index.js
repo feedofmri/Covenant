@@ -3,8 +3,8 @@
 import { Bot, InlineKeyboard } from "grammy";
 import { formatUnits } from "viem";
 
-export function createBot({ token, store, agent, webUrl, log, ctx }) {
-  const bot = new Bot(token);
+export function createBot({ token, store, agent, webUrl, log, ctx, botInfo }) {
+  const bot = new Bot(token, botInfo ? { botInfo } : undefined);
   const publicUrl = /^https:\/\//.test(webUrl ?? "");
   const link = (path) => `${webUrl}${path}`;
 
@@ -108,5 +108,6 @@ export function createBot({ token, store, agent, webUrl, log, ctx }) {
     start: () => bot.start({ onStart: (me) => log.info({ bot: me.username }, "telegram bot started") }).catch((e) => log.error({ err: e.message }, "telegram bot stopped")),
     stop: () => bot.stop(),
     deliver,
+    bot, // exposed for tests (bot.handleUpdate, bot.api.config)
   };
 }

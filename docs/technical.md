@@ -65,7 +65,7 @@ Covenant answers both with **two-way guardrails**: an on-chain contract bounds t
 Every trigger — owner message, schedule, incoming transfer, price event — runs one cycle, serialized per vault by a mutex and made idempotent by an atomic trigger claim (`claimTrigger`, safe across processes).
 
 1. **Observe** (`observe.js`): one snapshot of balances, buckets, caps, 24 h window usage, payees (with cooling-off and first-payment state), oracle prices, pause state, the mandate.
-2. **Plan** (`planner.js`): the model returns JSON against a schema built *per call*. The `payee` field is an enum of the aliases registered right now, so a model cannot name an arbitrary recipient. Amounts are decimal strings matching `^\d{1,9}(\.\d{1,6})?$`; no base units, exponents, negatives or hex. Scheduled mandates skip the model entirely (`templates.js`).
+2. **Plan** (`planner.js`): the model returns JSON against a schema built *per call*. The `payee` field is an enum of the aliases registered right now; the reply is validated against that schema, so any other recipient is rejected and the cycle fails closed (tested in `agent/test/model.test.js`). Amounts are decimal strings matching `^\d{1,9}(\.\d{1,6})?$`; no base units, exponents, negatives or hex. Scheduled mandates skip the model entirely (`templates.js`).
 3. **Compile** (`compile.js`): aliases → on-chain payee ids, decimals read from the token, bucket ids, exact adapter calls. New-payee requests become an *owner action* (calldata the owner signs), never an agent call.
 4. **Check** (`risk/engine.js`): 15 rules (§3.3) with running bucket balances so multi-step plans are checked in order.
 5. **Tier** (`tier.js`): mirrors the contract — T1 executes, T2 becomes an on-chain proposal, T3 is refused.
@@ -186,8 +186,9 @@ See the [security self-assessment](self-assessment.md) for the full tier table w
 | --- | --- | --- |
 | Contract unit tests | 38 / 38 pass | `npm run test:contracts` |
 | Invariant harness | 0 violations over 300 sequences × 60 steps (18 000 random calls) | `INVARIANT_RUNS=300 INVARIANT_STEPS=60 npm run test:contracts` |
-| Agent tests | 16 unit + 8 end-to-end pass | `npm -w agent test` |
-| Server tests | 6 / 6 | `npm -w server test` |
+| Agent tests | 32 pass: 16 unit, 8 Claude-adapter tests against a fake Messages API (request shape, refusal, rate limit, malformed or out-of-schema output, offline fallback), 8 end-to-end | `npm -w agent test` |
+| Server tests | 21 pass: API and wallet auth, Telegram bot (roles, forwarded messages, approve buttons), system test (indexer, hostile token airdrop, payee registration, mandate round trip, gasless relay, peg monitor, batch anchoring, every receipt verified), unattended run | `npm -w server test` |
+| Container | image builds and runs healthy against a chain | `docker build .` |
 | Browser flows | sign-in, chat, gasless co-sign, guardian pause/unpause, mandate preview, add payee | Playwright script in the dev notes |
 | Red-team suite | **30 / 30 cases stopped, attacker gained 0**, 22 reverted attack transactions on-chain | `npm run redteam` |
 | Demo scenarios | D1–D9 complete end to end | `npm run demo` |

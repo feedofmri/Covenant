@@ -1,0 +1,10 @@
+node_modules
+**/node_modules
+data
+evidence
+contracts/artifacts
+contracts/cache
+contracts/coverage
+web/dist
+.env
+.git

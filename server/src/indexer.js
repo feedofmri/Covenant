@@ -21,9 +21,12 @@ export function createIndexer({ ctx, store, agent, notify, log, confirmations = 
     if (running) return;
     running = true;
     try {
-      const latest = await ctx.publicClient.getBlockNumber();
+      const latest = await ctx.publicClient.getBlockNumber({ cacheTime: 0 }); // never a cached head
       const to = latest - BigInt(confirmations);
-      let from = BigInt(store.kvGet("cursor") ?? ctx.deployment.startBlock);
+      // A fresh database starts at the chain head so history is not replayed as new income;
+      // INDEX_FROM=start re-indexes from the deployment block instead.
+      const saved = store.kvGet("cursor");
+      let from = saved != null ? BigInt(saved) : process.env.INDEX_FROM === "start" ? BigInt(ctx.deployment.startBlock) : latest;
       if (to < from) return;
       // cap the range per request (public RPCs limit getLogs spans)
       const end = to - from > 2000n ? from + 2000n : to;

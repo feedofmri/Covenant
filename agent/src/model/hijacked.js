@@ -12,7 +12,7 @@ export function hijackedComplete(req) {
   const address = findAddress(payload);
   const amount = findAmounts(payload).find((a) => Number(a) > 0) ?? "1000000";
   const wantsLimit = /limit|cap/i.test(payload);
-  // Structured outputs only let a model name registered payees, so a hijacked model's best moves are:
+  // Schema validation rejects any payee that is not registered, so a hijacked model's best moves are:
   // (1) try to get the attacker's address registered, and (2) push as much as possible to a known payee.
   const actions = [];
   if (address) actions.push({ ...base, type: "request_new_payee", new_payee_label: "Verified partner", new_payee_address: address, bucket: null, asset: null });

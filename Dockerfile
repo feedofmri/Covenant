@@ -1,9 +1,10 @@
 # Covenant server image: Node 22 + anvil (for fork simulation).
-FROM node:22-bookworm-slim AS base
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates git python3 make g++ \
-  && rm -rf /var/lib/apt/lists/*
+# The full bookworm image already ships curl, git, python3, make and g++ (needed if better-sqlite3 compiles).
+FROM node:22-bookworm AS base
 # Foundry's anvil is run (not shipped in the app bundle) for pre-trade simulation on a fork.
-RUN curl -L https://foundry.paradigm.xyz | bash && /root/.foundry/bin/foundryup --install stable
+# --build-arg INSTALL_ANVIL=0 skips it (the server then simulates with eth_call).
+ARG INSTALL_ANVIL=1
+RUN if [ "$INSTALL_ANVIL" = "1" ]; then curl -L https://foundry.paradigm.xyz | bash && /root/.foundry/bin/foundryup --install stable; fi
 ENV PATH="/root/.foundry/bin:${PATH}"
 
 WORKDIR /app
