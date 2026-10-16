@@ -35,7 +35,7 @@ export function createScheduler({ ctx, store, agent, indexer, notify, log, confi
     const employer = createWalletClient({ account: privateKeyToAccount(env.EMPLOYER_PRIVATE_KEY), chain: ctx.chain, transport: http(config.rpcUrls[0]) });
     tasks.push(cron.schedule(env.UNATTENDED_PAYDAY_CRON || "0 */6 * * *", async () => {
       try {
-        const hash = await employer.writeContract({ address: ctx.tokens.USDC.address, abi: ctx.abis.erc20, functionName: "transferWithMemo", args: [ctx.vault.address, parseUnits(env.UNATTENDED_WAGE || "500", 6), `Wages ${stamp()} (simulated employer)`] });
+        const hash = await employer.writeContract({ address: ctx.tokens.USDC.address, abi: ctx.abis.erc20, functionName: "transferWithMemo", args: [ctx.vault.address, parseUnits(env.UNATTENDED_WAGE || "1000", 6), `Wages ${stamp()} (simulated employer)`] });
         log.info({ hash }, "unattended payday deposit");
       } catch (e) {
         log.error({ err: e.shortMessage ?? e.message }, "payday deposit failed");

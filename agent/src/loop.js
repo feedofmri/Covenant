@@ -212,7 +212,7 @@ export function createAgent({ ctx, config, store, model, notify = async () => {}
 
     const warn = verdict.checks.find((x) => x.id === "R-11" && x.status === "t2");
     if (warn && proposals.length) await notify({ to: "guardian", kind: "scam_warn", text: `Covenant asked for a co-signature on a payment that looks unusual. ${warn.detail}` });
-    const status = proposals.length && !t1.length ? "awaiting_owner" : "executed";
+    const status = proposals.length ? "awaiting_owner" : "executed";
     const rec = await record(d, {
       status, txHashes, scenario,
       deltas: t1.length ? { simulated: sim.simulated, actual: fmtDeltas(actual, state) } : null,

@@ -14,3 +14,5 @@ data/
 shared/deployments/localhost.json
 shared/mandates/localhost.json
 agent/test/fixtures/tmp/
+evidence/localhost/
+redteam/*localhost*

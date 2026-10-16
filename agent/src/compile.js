@@ -29,7 +29,7 @@ export function compile(plan, state, intentHash) {
         });
         break;
       case "reallocate":
-        calls.push({ type: "reallocate", fn: "reallocate", args: [asset.address, BUCKETS[action.from], BUCKETS[action.to], units(action.amount), intentHash], asset: asset.symbol, amount: units(action.amount), bucket: action.from, resolved: action.from !== action.to });
+        calls.push({ type: "reallocate", fn: "reallocate", args: [asset.address, BUCKETS[action.from], BUCKETS[action.to], units(action.amount), intentHash], asset: asset.symbol, amount: units(action.amount), bucket: action.from, to: action.to, resolved: action.from !== action.to });
         break;
       case "supply":
       case "withdraw":

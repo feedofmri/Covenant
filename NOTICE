@@ -1,0 +1,25 @@
+Covenant
+Copyright (c) 2026 The Covenant team. Licensed under the MIT License (see LICENSE).
+
+All source code in this repository is original work of the team.
+
+Third-party components shipped with the software (production dependencies):
+  - OpenZeppelin Contracts (MIT)          - viem (MIT)            - zod (MIT)
+  - @anthropic-ai/sdk (MIT)               - fastify (MIT)         - grammY (MIT)
+  - better-sqlite3 (MIT)                  - node-cron (ISC)       - pino (MIT)
+  - canonicalize (Apache-2.0)             - React, React Router, TanStack Query (MIT)
+  `npm run licenses` checks every production dependency against the allowlist
+  MIT, ISC, Apache-2.0, BSD-2-Clause, BSD-3-Clause, 0BSD, CC0-1.0, Unlicense, BlueOak-1.0.0.
+
+Interfaces written from public ABIs (no code copied):
+  - Chainlink AggregatorV3Interface, Aave v3 Pool (supply/withdraw), a Uniswap-style router shape.
+  Uniswap and Aave source code (GPL/BUSL) is NOT included or derived from.
+
+Tools run but not shipped:
+  - Hardhat and plugins (MIT), solc-js (GPL-3.0, compiler only), Foundry/anvil (MIT/Apache-2.0),
+    Slither (AGPL-3.0, static analysis only), Vite/Tailwind (MIT), Playwright (Apache-2.0).
+
+Data:
+  - shared/denylist.json: Ethereum addresses from the U.S. Treasury OFAC SDN list (public domain).
+
+Testnet mocks (contracts/src/mocks) are clearly labelled and never used on mainnet.

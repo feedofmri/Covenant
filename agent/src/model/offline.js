@@ -14,7 +14,7 @@ export function offlineComplete(req) {
 }
 
 function plan(req) {
-  const { text = "", payees = [], trigger = {}, mandate, unallocated = "0" } = req.context ?? {};
+  const { text = "", payees = [], trigger = {}, mandate, unallocated = "0", buckets = {} } = req.context ?? {};
   if (trigger.type === "incoming_transfer" && mandate) {
     const total = Number(unallocated);
     const splits = Object.entries(mandate.buckets).filter(([, pct]) => pct > 0)
@@ -62,11 +62,24 @@ function plan(req) {
     };
   }
   if (payVerb && payee && amount) {
-    const purpose = /hospital|medical|doctor|হাসপাতাল/i.test(text) ? "medical" : /school|tuition|fees/i.test(text) ? "education" : "family support";
+    const purpose = /hospital|medical|doctor|medicine|surgery|হাসপাতাল|ডাক্তার/i.test(text) ? "medical" : /school|tuition|fees/i.test(text) ? "education" : "family support";
+    // Top up the family bucket when it is short: from the emergency fund for medical needs, else from savings.
+    const need = Number(amount);
+    const family = Number(buckets.FAMILY ?? need);
+    const source = purpose === "medical" ? "EMERGENCY" : "SAVINGS";
+    const shortfall = Math.max(0, need - family);
+    const actions = [];
+    let note = "";
+    if (shortfall > 0 && Number(buckets[source] ?? 0) >= shortfall) {
+      const amt = shortfall.toFixed(2);
+      actions.push(action({ type: "reallocate", asset, amount: amt, bucket: source, to_bucket: "FAMILY" }));
+      note = ` The family bucket is short, so ${amt} moves from ${source === "EMERGENCY" ? "the emergency fund" : "savings"} first.`;
+    }
+    actions.push(action({ type: "pay", payee, asset, amount, bucket: "FAMILY", purpose }));
     return {
       intent: `Send ${amount} ${asset} to ${payee}`,
-      actions: [action({ type: "pay", payee, asset, amount, bucket: "FAMILY", purpose })],
-      explanation: `Pay ${amount} ${asset} to ${payee} (${purpose}) from the family bucket.`,
+      actions,
+      explanation: `Pay ${amount} ${asset} to ${payee} (${purpose}) from the family bucket.${note}`,
       clarification: null,
     };
   }

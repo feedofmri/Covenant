@@ -27,8 +27,9 @@ export function checkPlan({ plan, calls, ownerActions, state, trigger, history =
 
   const planned = {}; // per-asset planned pay outflow in this cycle
   let scam = null;
+  const running = Object.fromEntries(Object.entries(state.assets).map(([k, v]) => [k, { ...v.buckets }]));
   for (const c of calls) {
-    const a = state.assets[c.asset];
+    const a = { ...state.assets[c.asset], buckets: running[c.asset] };
     const fmt = (v) => `${formatUnits(v, a.decimals)} ${a.symbol}`;
     // R-03 asset
     if (!a.policy.allowed) checks.push(R("R-03", "block", `${a.symbol} not allowed`));
@@ -51,6 +52,7 @@ export function checkPlan({ plan, calls, ownerActions, state, trigger, history =
       if (fromEmergency) checks.push(R("R-08", "block", "emergency fund is only used on the owner's request"));
       else if (bal < c.amount) checks.push(R("R-08", "block", `${c.bucket.toLowerCase()} bucket has ${fmt(bal)}, needs ${fmt(c.amount)}`));
       else checks.push(R("R-08", "pass"));
+      running[c.asset][c.bucket] = bal - c.amount;
       // R-12 duplicates
       const dup = (history.recentPayments ?? []).find((p) => p.payeeId === c.payee?.id && p.amount === c.amount.toString() && state.now - p.at < RISK.duplicateWindowSec);
       checks.push(dup && trigger.type !== "redteam" ? R("R-12", "block", "same payment was made less than 10 minutes ago") : R("R-12", "pass"));
@@ -74,13 +76,14 @@ export function checkPlan({ plan, calls, ownerActions, state, trigger, history =
       checks.push(stable && Math.abs(a.price - 1) * 10000 > depegBps ? R("R-07", "block", `${a.symbol} is off its peg (${a.price.toFixed(4)} USD)`) : R("R-07", "pass"));
       const bal = a.buckets[c.bucket] ?? 0n;
       checks.push(bal < c.amount ? R("R-08", "block", `${c.bucket.toLowerCase()} bucket has ${fmt(bal)}, needs ${fmt(c.amount)}`) : R("R-08", "pass"));
+      running[c.asset][c.bucket] = bal - c.amount;
     }
     if (c.type === "supply") {
       // R-09 lending exposure + liquid buffer
       const wouldBe = a.supplied + c.amount;
       const buffer = state.mandate ? BigInt(Math.round(Number(state.mandate.savings.liquidBuffer) * 10 ** a.decimals)) : 0n;
       if (wouldBe > a.policy.lendingCap) checks.push(R("R-09", "block", `lending would reach ${fmt(wouldBe)}, cap is ${fmt(a.policy.lendingCap)}`));
-      else if (!instruction && (a.buckets.SAVINGS ?? 0n) - c.amount < buffer) checks.push(R("R-09", "block", "would leave savings below the liquid buffer"));
+      else if (!instruction && c.bucket === "SAVINGS" && (a.buckets.SAVINGS ?? 0n) < buffer) checks.push(R("R-09", "block", "would leave savings below the liquid buffer")); // running balance is already debited
       else checks.push(R("R-09", "pass"));
     }
     if (c.type === "swap") {
@@ -97,7 +100,10 @@ export function checkPlan({ plan, calls, ownerActions, state, trigger, history =
     if (c.type === "reallocate" || c.type === "withdraw") {
       if (c.type === "reallocate") {
         const bal = a.buckets[c.bucket] ?? 0n;
-        checks.push(bal < c.amount ? R("R-08", "block", `${c.bucket.toLowerCase()} bucket has ${fmt(bal)}`) : R("R-08", "pass"));
+        const fromEmergency = c.bucket === "EMERGENCY" && !instruction;
+        checks.push(fromEmergency ? R("R-08", "block", "emergency fund is only used on the owner's request") : bal < c.amount ? R("R-08", "block", `${c.bucket.toLowerCase()} bucket has ${fmt(bal)}`) : R("R-08", "pass"));
+        running[c.asset][c.bucket] = bal - c.amount;
+        running[c.asset][c.to] = (running[c.asset][c.to] ?? 0n) + c.amount;
       }
     }
     if (c.type === "allocate") {

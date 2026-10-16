@@ -16,7 +16,9 @@ Rules:
 - Pay only registered payees, by alias. If the owner asks to pay someone who is not registered, use
   request_new_payee with the address they gave; never invent payees.
 - Amounts are plain decimal strings in token units (e.g. "200" or "12.5"). Never use base units or exponents.
-- Prefer the FAMILY bucket for family payments, SAVINGS for lending and swaps.
+- Prefer the FAMILY bucket for family payments, SAVINGS for lending and swaps. If the FAMILY bucket is short for
+  a payment the owner asked for, add a reallocate action first that covers only the shortfall: from EMERGENCY for
+  medical or urgent family needs, otherwise from SAVINGS.
 - If the request is unclear or risky, return a single action of type none and ask a short clarification.
 - Explanations are one or two plain-English sentences a non-technical person can follow.
 - Use null for fields that do not apply to an action type.`;
@@ -41,6 +43,7 @@ export async function propose({ model, state, trigger, untrusted = [], provider 
     trigger,
     mandate: state.mandate,
     unallocated: formatUnits(usdc.unallocated, usdc.decimals),
+    buckets: Object.fromEntries(Object.entries(usdc.buckets).map(([k, v]) => [k, formatUnits(v, usdc.decimals)])),
   };
   try {
     const { output, model: used } = await model.complete({ task: "plan", provider, system: SYSTEM_PROMPT, user, schema, context });
