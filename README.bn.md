@@ -391,10 +391,12 @@ DEPLOYMENT=localhost
 RPC_URLS=http://127.0.0.1:8545
 
 # এজেন্ট মডেল কনফিগারেশন
-MODEL_PROVIDER=offline              # অথবা 'anthropic'
+MODEL_PROVIDER=openai               # 'openai' (ChatGPT) | 'anthropic' (Claude) | 'offline'
+OPENAI_API_KEY=                     # ChatGPT API কি (যেমন sk-proj-...)
+OPENAI_BASE_URL=https://api.openai.com/v1 # অপশনাল: কাস্টম এন্ডপয়েন্ট বা প্রক্সি
 ANTHROPIC_API_KEY=                  # Claude কি (যদি anthropic ব্যবহার করেন)
-PLANNER_MODEL=claude-opus-5-5
-CLASSIFIER_MODEL=claude-haiku-5-5
+PLANNER_MODEL=gpt-4o                # OpenAI-এর জন্য 'gpt-4o' অথবা Claude-এর জন্য 'claude-opus-5-5'
+CLASSIFIER_MODEL=gpt-4o-mini        # OpenAI-এর জন্য 'gpt-4o-mini' অথবা Claude-এর জন্য 'claude-haiku-5-5'
 
 # সার্ভার সেটিংস
 PORT=8787

@@ -13,13 +13,16 @@ export function loadConfig(overrides = {}) {
     simMode: env.SIM_MODE || "", // fork | snapshot | eth_call (default: fork if SIM_RPC_URL, snapshot on chain 31337) // when set, the sim node is reset to this chain's latest block before each run
     agentPrivateKey: env.AGENT_PRIVATE_KEY || "",
     model: {
-      provider: env.MODEL_PROVIDER || (env.ANTHROPIC_API_KEY ? "anthropic" : "offline"),
-      planner: env.PLANNER_MODEL || "claude-opus-5-5",
-      classifier: env.CLASSIFIER_MODEL || "claude-haiku-5-5",
+      provider: env.MODEL_PROVIDER || (env.OPENAI_API_KEY ? "openai" : (env.ANTHROPIC_API_KEY ? "anthropic" : "offline")),
+      planner: env.PLANNER_MODEL || (env.MODEL_PROVIDER === "openai" || env.MODEL_PROVIDER === "chatgpt" || env.OPENAI_API_KEY ? "gpt-4o" : "claude-opus-5-5"),
+      classifier: env.CLASSIFIER_MODEL || (env.MODEL_PROVIDER === "openai" || env.MODEL_PROVIDER === "chatgpt" || env.OPENAI_API_KEY ? "gpt-4o-mini" : "claude-haiku-5-5"),
       plannerEffort: env.PLANNER_EFFORT || "medium",
       timeoutMs: num(env.MODEL_TIMEOUT_MS, 30000),
       fixtureDir: env.MODEL_FIXTURE_DIR || "",
       record: env.MODEL_RECORD === "1",
+      openaiApiKey: env.OPENAI_API_KEY || "",
+      openaiBaseUrl: env.OPENAI_BASE_URL || "https://api.openai.com/v1",
+      anthropicApiKey: env.ANTHROPIC_API_KEY || "",
     },
     anchorMode: env.ANCHOR_MODE || "each", // each | batch
     simTolerance: 1n,

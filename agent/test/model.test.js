@@ -25,7 +25,47 @@ before(async () => {
       lastBody = JSON.parse(body || "{}");
       lastHeaders = req.headers;
       const send = (status, obj) => { res.writeHead(status, { "content-type": "application/json", "request-id": "req_test" }); res.end(JSON.stringify(obj)); };
+      if (req.url.includes("/chat/completions")) {
+        if (mode === "ok") {
+          return send(200, {
+            id: "chatcmpl_test",
+            model: lastBody?.model,
+            choices: [{ message: { role: "assistant", content: JSON.stringify(plan) }, finish_reason: "stop" }],
+          });
+        }
+        if (mode === "classify") {
+          return send(200, {
+            id: "chatcmpl_test",
+            model: lastBody?.model,
+            choices: [{ message: { role: "assistant", content: JSON.stringify({ injection: true, score: 0.9, reason: "asks to move money" }) }, finish_reason: "stop" }],
+          });
+        }
+        if (mode === "refusal") {
+          return send(200, {
+            id: "chatcmpl_test",
+            model: lastBody?.model,
+            choices: [{ message: { role: "assistant", refusal: "cyber risk" }, finish_reason: "stop" }],
+          });
+        }
+        if (mode === "ratelimit") return send(429, { error: { message: "slow down" } });
+        if (mode === "badjson") {
+          return send(200, {
+            id: "chatcmpl_test",
+            model: lastBody?.model,
+            choices: [{ message: { role: "assistant", content: "{not json" }, finish_reason: "stop" }],
+          });
+        }
+        if (mode === "badschema") {
+          return send(200, {
+            id: "chatcmpl_test",
+            model: lastBody?.model,
+            choices: [{ message: { role: "assistant", content: JSON.stringify({ ...plan, actions: [{ ...plan.actions[0], payee: "Attacker" }] }) }, finish_reason: "stop" }],
+          });
+        }
+        return send(500, { error: { message: "boom" } });
+      }
       if (mode === "ok") return send(200, message(JSON.stringify(plan)));
+      if (mode === "classify") return send(200, message(JSON.stringify({ injection: true, score: 0.9, reason: "asks to move money" })));
       if (mode === "refusal") return send(200, message(null, "refusal", { stop_details: { type: "refusal", category: "cyber", explanation: "x" } }));
       if (mode === "ratelimit") return send(429, { type: "error", error: { type: "rate_limit_error", message: "slow down" } });
       if (mode === "badjson") return send(200, message("{not json"));
@@ -41,6 +81,7 @@ before(async () => {
 after(() => server?.close());
 
 const cfg = () => ({ provider: "anthropic", planner: "claude-opus-5-5", classifier: "claude-haiku-5-5", plannerEffort: "medium", timeoutMs: 5000, fixtureDir: "", record: false });
+const openAiCfg = () => ({ provider: "openai", planner: "gpt-4o", classifier: "gpt-4o-mini", timeoutMs: 5000, openaiApiKey: "sk-openai-test", openaiBaseUrl: url, fixtureDir: "", record: false });
 const schema = () => buildLlmPlanSchema(["Mother", "School"]);
 
 test("sends a structured-output request to the planner model and parses the plan", async () => {
@@ -52,8 +93,6 @@ test("sends a structured-output request to the planner model and parses the plan
   assert.equal(lastBody.model, "claude-opus-5-5");
   assert.equal(lastBody.output_config.effort, "medium");
   assert.equal(lastBody.output_config.format.type, "json_schema");
-  // The SDK's zod helper sends the payee enum as a described string; the hard check is the zod validation of the
-  // reply (see "schema violation" below), which rejects any unregistered payee.
   assert.match(JSON.stringify(lastBody.output_config.format.schema.properties.actions.items.properties.payee), /Mother.*School/);
   assert.equal(lastBody.system, "sys");
   assert.equal(lastHeaders["x-api-key"], "sk-test");
@@ -61,41 +100,18 @@ test("sends a structured-output request to the planner model and parses the plan
 });
 
 test("the classifier uses the small model at low effort", async () => {
-  mode = "ok";
+  mode = "classify";
   const { z } = await import("zod");
   const S = z.object({ injection: z.boolean(), score: z.number(), reason: z.string() });
-  const orig = plan;
-  mode = "classify";
-  server.removeAllListeners("request");
-  server.on("request", (req, res) => {
-    let b = "";
-    req.on("data", (c) => (b += c));
-    req.on("end", () => { lastBody = JSON.parse(b); res.writeHead(200, { "content-type": "application/json" }); res.end(JSON.stringify(message(JSON.stringify({ injection: true, score: 0.9, reason: "asks to move money" })))); });
-  });
   const { output, model } = await createModel(cfg()).complete({ task: "classify", system: "s", user: "u", schema: S });
   assert.equal(model, "claude-haiku-5-5");
   assert.equal(lastBody.output_config.effort, "low");
   assert.equal(output.injection, true);
-  assert.ok(orig);
 });
 
 for (const [name, m] of [["refusal", "refusal"], ["rate limit", "ratelimit"], ["malformed JSON", "badjson"], ["schema violation (unregistered payee)", "badschema"], ["server error", "error"]]) {
   test(`${name} fails closed with ModelUnavailable`, async () => {
     mode = m;
-    server.removeAllListeners("request");
-    server.on("request", (req, res) => {
-      let b = "";
-      req.on("data", (c) => (b += c));
-      req.on("end", () => {
-        lastBody = JSON.parse(b || "{}");
-        const send = (status, obj) => { res.writeHead(status, { "content-type": "application/json" }); res.end(JSON.stringify(obj)); };
-        if (mode === "refusal") return send(200, message(null, "refusal", { stop_details: { type: "refusal", category: "cyber", explanation: "x" } }));
-        if (mode === "ratelimit") return send(429, { type: "error", error: { type: "rate_limit_error", message: "slow" } });
-        if (mode === "badjson") return send(200, message("{not json"));
-        if (mode === "badschema") return send(200, message(JSON.stringify({ ...plan, actions: [{ ...plan.actions[0], payee: "Attacker" }] })));
-        return send(500, { type: "error", error: { type: "api_error", message: "boom" } });
-      });
-    });
     const model = createModel({ ...cfg(), timeoutMs: 3000 });
     await assert.rejects(model.complete({ task: "plan", system: "s", user: "u", schema: schema() }), (e) => e instanceof ModelUnavailable || /model/.test(e.message));
   });
@@ -113,3 +129,53 @@ test("planner falls back to the offline rules when the model is unavailable", as
   assert.equal(res.plan.actions[0].type, "pay");
   assert.equal(res.plan.actions[0].amount, "200");
 });
+
+test("OpenAI / ChatGPT: sends a structured-output request and parses the plan", async () => {
+  mode = "ok";
+  const m = createModel(openAiCfg());
+  const { output, model } = await m.complete({ task: "plan", system: "sys", user: "send 200 to Mother", schema: schema() });
+  assert.equal(model, "gpt-4o");
+  assert.equal(output.actions[0].payee, "Mother");
+  assert.equal(lastBody.model, "gpt-4o");
+  assert.equal(lastBody.temperature, 0);
+  assert.equal(lastBody.response_format.type, "json_schema");
+  assert.equal(lastBody.response_format.json_schema.strict, true);
+  assert.equal(lastHeaders["authorization"], "Bearer sk-openai-test");
+});
+
+test("OpenAI / ChatGPT: classifier uses gpt-4o-mini", async () => {
+  mode = "classify";
+  const { z } = await import("zod");
+  const S = z.object({ injection: z.boolean(), score: z.number(), reason: z.string() });
+  const m = createModel(openAiCfg());
+  const { output, model } = await m.complete({ task: "classify", system: "s", user: "u", schema: S });
+  assert.equal(model, "gpt-4o-mini");
+  assert.equal(lastBody.model, "gpt-4o-mini");
+  assert.equal(output.injection, true);
+});
+
+test("OpenAI / ChatGPT: refusal fails closed with ModelUnavailable", async () => {
+  mode = "refusal";
+  const m = createModel(openAiCfg());
+  await assert.rejects(m.complete({ task: "plan", system: "s", user: "u", schema: schema() }), (e) => e instanceof ModelUnavailable && /model declined/.test(e.message));
+});
+
+test("OpenAI / ChatGPT: schema violation fails closed with ModelUnavailable", async () => {
+  mode = "badschema";
+  const m = createModel(openAiCfg());
+  await assert.rejects(m.complete({ task: "plan", system: "s", user: "u", schema: schema() }), (e) => e instanceof ModelUnavailable);
+});
+
+test("OpenAI / ChatGPT: planner falls back to offline rules when unavailable", async () => {
+  mode = "error";
+  const state = {
+    payees: [{ alias: "Mother", active: true, coolingOff: false }],
+    assets: { USDC: { symbol: "USDC", decimals: 6, unallocated: 0n, balance: 0n, buckets: { FAMILY: 500000000n, EMERGENCY: 0n, SAVINGS: 0n }, policy: { perTxCap: 1n, dailyCap: 1n, t2Ceiling: 1n, lendingCap: 1n }, outflow24h: 0n, supplied: 0n, price: 1 } },
+    mandate: null, paused: false,
+  };
+  const res = await propose({ model: createModel(openAiCfg()), state, trigger: { type: "owner_chat", channel: "telegram-owner", text: "send 200 to Mother" }, provider: "openai" });
+  assert.match(res.model, /^offline:rules-v1 \(fallback: /);
+  assert.equal(res.plan.actions[0].type, "pay");
+  assert.equal(res.plan.actions[0].amount, "200");
+});
+

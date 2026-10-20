@@ -374,9 +374,11 @@ Copy `.env.example` to `.env`. Every package reads the repository-root `.env`; v
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `MODEL_PROVIDER` | `anthropic` if a key is set, else `offline` | `anthropic` or `offline` (`hijacked` is red-team only and refused by the server) |
+| `MODEL_PROVIDER` | `openai` if `OPENAI_API_KEY` set, `anthropic` if `ANTHROPIC_API_KEY` set, else `offline` | `openai` / `chatgpt`, `anthropic`, or `offline` (`hijacked` is red-team only and refused by the server) |
+| `OPENAI_API_KEY` | — | OpenAI API key for ChatGPT models (e.g. `gpt-4o`, `gpt-4o-mini`) |
+| `OPENAI_BASE_URL` | `https://api.openai.com/v1` | Optional custom OpenAI endpoint or proxy |
 | `ANTHROPIC_API_KEY` | — | Claude API key |
-| `PLANNER_MODEL` · `CLASSIFIER_MODEL` | `claude-opus-5-5` · `claude-haiku-5-5` | Planner and injection-classifier models |
+| `PLANNER_MODEL` · `CLASSIFIER_MODEL` | `gpt-4o` / `gpt-4o-mini` (for OpenAI) or `claude-opus-5-5` / `claude-haiku-5-5` (for Anthropic) | Planner and injection-classifier models |
 | `PLANNER_EFFORT` | `medium` | Planner effort level |
 | `MODEL_TIMEOUT_MS` | `30000` | Per-call timeout |
 | `MODEL_FIXTURE_DIR` · `MODEL_RECORD` | — | Record (`MODEL_RECORD=1`) and replay model responses for deterministic tests |
