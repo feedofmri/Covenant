@@ -46,4 +46,5 @@ Telegram chat in English and Bangla, plain-language explanations on every action
 
 ## Links
 
-Video · Technical documentation (`docs/technical.md`) · Security self-assessment (`docs/self-assessment.md`) · Evidence ledger (`evidence/baseSepolia/ledger.md`) · Red-team results (`redteam/RESULTS.baseSepolia.md`) · Source: github.com/feedofmri/Covenant
+[Video (YouTube)](https://youtu.be/HIooyeAGKKY) · Technical documentation (`docs/technical.md`) · Security self-assessment (`docs/self-assessment.md`) · Evidence ledger (`evidence/baseSepolia/ledger.md`) · Red-team results (`redteam/RESULTS.baseSepolia.md`) · Source: github.com/feedofmri/Covenant
+

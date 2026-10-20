@@ -20,6 +20,15 @@
   <img src="https://img.shields.io/badge/Red--Team-30%2F30%20Stopped-success.svg" alt="Red Team" />
   <img src="https://img.shields.io/badge/Solidity-100%25%20Coverage-success.svg" alt="Coverage" />
   <img src="https://img.shields.io/badge/AI%20Models-OpenAI%20%7C%20Claude%20%7C%20Offline-orange.svg" alt="Models" />
+  <a href="https://youtu.be/HIooyeAGKKY"><img src="https://img.shields.io/badge/Demo-Video%20(YouTube)-red?logo=youtube" alt="Demo Video" /></a>
+</p>
+
+<p align="center">
+  <a href="https://youtu.be/HIooyeAGKKY" target="_blank" rel="noopener noreferrer">
+    <img src="https://img.youtube.com/vi/HIooyeAGKKY/maxresdefault.jpg" alt="Covenant — End-to-End Demo Video Walkthrough" width="760" style="max-width: 100%; border-radius: 10px;" />
+  </a>
+  <br>
+  <em>▶️ <strong><a href="https://youtu.be/HIooyeAGKKY" target="_blank" rel="noopener noreferrer">Watch the End-to-End Walkthrough Video on YouTube (5 mins)</a></strong> — Live demonstration of Autonomous Remittances (T1), Scam Shield &amp; Stolen Key Defense (T3), Gasless Co-signing (T2), and Cryptographic Verification.</em>
 </p>
 
 ---
@@ -28,6 +37,8 @@
 
 | Deliverable | Location | Description |
 | :--- | :--- | :--- |
+| **Video Walkthrough (YouTube)** | [youtu.be/HIooyeAGKKY](https://youtu.be/HIooyeAGKKY) | Full 5-minute live demonstration video of all scenarios & defenses |
+| **Video Walkthrough Plan** | [docs/SCREENRECORDING_WALKTHROUGH_PLAN.md](docs/SCREENRECORDING_WALKTHROUGH_PLAN.md) | Screen recording guide, storyboard & voiceover script |
 | **2-Page Judge Brief** | [docs/judge-brief.md](docs/judge-brief.md) | Executive summary, scenario matrix, security in numbers |
 | **Technical Documentation** | [docs/technical.md](docs/technical.md) | System architecture, core algorithms, security design |
 | **Security Self-Assessment** | [docs/self-assessment.md](docs/self-assessment.md) | Line-by-line Solidity tier mapping & threat matrix |
@@ -35,7 +46,6 @@
 | **Execution Evidence Ledger** | [evidence/localhost/ledger.md](evidence/localhost/ledger.md) | Real on-chain transaction hashes & execution receipts |
 | **Red-Team Security Results** | [redteam/RESULTS.localhost.md](redteam/RESULTS.localhost.md) | 30 adversarial attack cases & revert evidence |
 | **Deployment Runbook** | [docs/deployment.md](docs/deployment.md) | Step-by-step local and Base Sepolia testnet deployment |
-| **Video Walkthrough Plan** | [docs/SCREENRECORDING_WALKTHROUGH_PLAN.md](docs/SCREENRECORDING_WALKTHROUGH_PLAN.md) | Screen recording guide & voiceover script |
 
 ---
 
@@ -280,6 +290,8 @@ Covenant features a swappable model adapter architecture:
 ---
 
 ## 9. Demo Scenarios D1–D9
+
+> 📺 **Watch the live demonstration:** All 9 scenarios, prompt injection defense, and gasless co-signing are demonstrated step-by-step in the [YouTube Video Walkthrough](https://youtu.be/HIooyeAGKKY).
 
 The demo runner (`npm run demo`) executes 9 end-to-end scenarios validating all functional requirements:
 

@@ -1,5 +1,7 @@
 # Covenant — Video Walkthrough & Screen Recording Plan
 
+> 📺 **Recorded Video Walkthrough:** Watch the full 5-minute video on YouTube at **[https://youtu.be/HIooyeAGKKY](https://youtu.be/HIooyeAGKKY)**.
+
 This document is the complete director's guide, storyboard, and word-for-word voiceover script for recording an end-to-end demonstration video of **Covenant: A Guarded Family Wallet for Workers Abroad**.
 
 ---
