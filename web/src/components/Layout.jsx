@@ -35,7 +35,23 @@ export default function Layout({ children }) {
           <div className="ml-auto flex items-center gap-2">
             {dep && <Chip tone={dep.chainId === 31337 ? "muted" : "brand"}>{dep.chain}</Chip>}
             {!auth.isConnected ? (
-              <button className="btn-primary" onClick={auth.connect}>Connect wallet</button>
+              <div className="flex items-center gap-1.5">
+                {dep?.chainId === 31337 ? (
+                  <>
+                    <button className="btn-primary text-xs" onClick={() => auth.connectDev("owner")} title="Connect local dev Owner (Rahim)">
+                      Dev Owner
+                    </button>
+                    <button className="btn-ghost text-xs" onClick={() => auth.connectDev("guardian")} title="Connect local dev Guardian (Mother)">
+                      Dev Guardian
+                    </button>
+                    {auth.hasWallet && (
+                      <button className="btn-ghost text-xs" onClick={() => auth.connect()}>MetaMask</button>
+                    )}
+                  </>
+                ) : (
+                  <button className="btn-primary" onClick={() => auth.connect()}>Connect wallet</button>
+                )}
+              </div>
             ) : !auth.session ? (
               <button className="btn-primary" onClick={auth.signIn}>Sign in {short(auth.address)}</button>
             ) : (
@@ -45,7 +61,22 @@ export default function Layout({ children }) {
             )}
           </div>
         </div>
-        {auth.error && <p className="mx-auto max-w-6xl px-4 pb-2 text-sm text-bad">{auth.error.message}</p>}
+        {auth.error && (
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 pb-2 text-sm text-bad">
+            <span>{auth.error.message}</span>
+            {dep?.chainId === 31337 && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted">Or use local test account:</span>
+                <button className="rounded bg-brand/20 px-2 py-0.5 text-xs text-brand hover:bg-brand/30" onClick={() => auth.connectDev("owner")}>
+                  Connect as Owner
+                </button>
+                <button className="rounded bg-brand/20 px-2 py-0.5 text-xs text-brand hover:bg-brand/30" onClick={() => auth.connectDev("guardian")}>
+                  Connect as Guardian
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </header>
       <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
       <footer className="mx-auto max-w-6xl px-4 pb-10 text-xs text-muted">

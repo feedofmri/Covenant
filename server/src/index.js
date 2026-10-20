@@ -54,7 +54,7 @@ export async function startServer(overrides = {}) {
   return { app, ctx, store, agent, indexer, scheduler, bot, stop: async () => { indexer.stop(); scheduler.stop(); bot?.stop(); await app.close(); } };
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
   startServer().catch((e) => {
     console.error(e);
     process.exit(1);

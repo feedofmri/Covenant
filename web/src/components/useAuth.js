@@ -20,16 +20,24 @@ export function useAuth() {
     }
   }, [w]);
 
-  const connect = useCallback(async () => {
+  const connect = useCallback(async (role) => {
     setError(null);
-    try { await w.connect(); } catch (e) { setError(e); }
+    try { await w.connect(role); } catch (e) { setError(e); }
+  }, [w]);
+
+  const connectDev = useCallback((role = "owner") => {
+    setError(null);
+    try { w.connectDev(role); } catch (e) { setError(e); }
   }, [w]);
 
   const valid = s && w.address && s.address?.toLowerCase() === w.address.toLowerCase() ? s : null;
   return {
     address: w.address, isConnected: w.isConnected, session: valid, role: valid?.role ?? null, error,
     connect,
+    connectDev,
     disconnect: () => { session.set(null); w.disconnect(); },
     signIn,
+    hasWallet: w.hasWallet,
+    devRole: w.devRole,
   };
 }

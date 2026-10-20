@@ -9,6 +9,7 @@ PBCSF Fintechathon 2026 · International Track · **Topic F — Agent Wallet**
 | | |
 | --- | --- |
 | 2-page judge brief | [docs/judge-brief.md](docs/judge-brief.md) |
+| Bangla documentation (বাংলা গাইড) | [README.bn.md](README.bn.md) |
 | Technical documentation | [docs/technical.md](docs/technical.md) |
 | Security self-assessment | [docs/self-assessment.md](docs/self-assessment.md) |
 | Known-risk list | [docs/known-risks.md](docs/known-risks.md) |
