@@ -423,6 +423,10 @@ DEPLOYER_PRIVATE_KEY="0x..." npx hardhat run contracts/scripts/deploy.js --netwo
 DEPLOYMENT=baseSepolia npm run server
 ```
 
+> [!TIP]
+> cPanel ও ক্লাউড (Docker, Ubuntu VPS, PM2, Nginx, SSL, Telegram Bot) প্রোডাকশন ডেপ্লয়মেন্টের বিশদ নির্দেশিকার জন্য দেখুন:  
+> 📖 [docs/PRODUCTION_DEPLOYMENT_GUIDE.md](docs/PRODUCTION_DEPLOYMENT_GUIDE.md)
+
 ---
 
 ## ১০. পরীক্ষা ও রেড-টিম অডিট
